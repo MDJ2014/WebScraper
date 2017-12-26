@@ -1,0 +1,25 @@
+{
+  "name": "scraper",
+  "version": "0.0.1",
+  "description": "web scraper",
+  "main": "scraper.js",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2",
+    "json2csv": "^3.11.5",
+    "moment": "^2.20.1",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2",
+    "rimraf": "^2.6.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node scraper.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "web",
+    "scraper"
+  ],
+  "author": "Mark Jones",
+  "license": "MIT"
+}
