@@ -12,7 +12,7 @@ var rimraf = require('rimraf');
 var shirtUrls=[];
 var fields = ['Title', 'Price', 'Image URL', 'URL', 'Time'];
 var csv='';
-
+var shirtLinks=[];
 //set options for entry point
 var options = {
      uri: 'http://shirts4mike.com/shirts.php',
@@ -43,16 +43,21 @@ resolve({});
 };
 
 //uses options to open the website and scraper the individual urls
-var getUrls = function(someStuff) {
+var getUrls = function() {
    var promise = new Promise(function(resolve, err){
-     request('http://shirts4mike.com/shirts.php', function (error, response, body) {
+    // request('http://shirts4mike.com/shirts.php', function (error, response, body) {
+     request('https://calm-spire-44416.herokuapp.com', function (error, response, body) {
      if (!error && response.statusCode == 200) {
      var $ = cheerio.load(body);
       $('ul.products').find("li").each(function(i, element){
          var shirtLink=$(this).children("a").attr("href");
-         var shirtLinkUrl='http://shirts4mike.com/' + shirtLink;
+         //var shirtLinkUrl='http://shirts4mike.com/' + shirtLink;
+         var shirtLinkUrl='https://calm-spire-44416.herokuapp.com/' + shirtLink;
          shirtUrls.push(shirtLinkUrl); //urls saved in array
-     });
+         shirtLinks.push(shirtLink);
+          });
+}else {
+   console.log("error reaching website: shirts4mile.com");
 }
 resolve(shirtUrls);
 });
@@ -67,7 +72,10 @@ var makeCsv = function(urls) {
 
       var counter=0;
 
-         urls.forEach(function(link) {
+for(var i=0; i<shirtLinks.length;i++){
+      //   urls.forEach(function(link) {
+            var link= 'https://calm-spire-44416.herokuapp.com/'+shirtLinks[i];
+
          request(link, function (error, response, body) {
           if (!error && response.statusCode == 200) {
                           counter++;
@@ -75,24 +83,30 @@ var makeCsv = function(urls) {
                             var title=$('head title').text();
                            var price=$('.price').text();
                             var imgSrc=$('.shirt-picture').find('span img').attr('src');
-                            var imgUrl= 'http://www.shirts4mike.com/' + imgSrc;
+                           // var imgSrc= 'https://calm-spire-44416.herokuapp.com/img/shirts/'+shirtLinks[i]+'.jpg';
+
+                           // var imgUrl= 'http://www.shirts4mike.com/' + imgSrc;
+                           var imgUrl= 'https://calm-spire-44416.herokuapp.com/' + imgSrc;
+                            console.log("IMG URL: " + imgUrl);
 //format the the current time.
-                          var time =   moment(new Date()).format('MM-DD-YYYY');
+                            var date =   moment(new Date()).format('YYYY-MM-DD');
+                            var time=    moment(new Date()).format('MMMM Do YYYY, h:mm a');
                             var shirt= new Object();
-                           shirts[counter]=shirt;
+                             shirts[counter]=shirt;
  //make shirt Object
 
          shirt.Title = title;
          shirt.Price=price;
-         shirt.ImgLink = imgUrl;
+         shirt.Img = imgUrl;
          shirt.URL=link;
          shirt.Time=time;
+
          shirts.push(shirt);
 
 //write each object to file
        csv = json2csv({ data: shirts, fields: fields });
 
-fs.writeFile(dir + '/' + time + '.csv', csv, function(error){
+fs.writeFile(dir + '/' + date + '.csv', csv, function(error){
            if (error){
               var errormsg = "Invalid url. csv file NOT saved";
               fs.writeFile('./scraper_error.log', errormsg + "  " + time, (error)=>{
@@ -105,10 +119,12 @@ fs.writeFile(dir + '/' + time + '.csv', csv, function(error){
            }
 
               });
+           }else {
+              console.log("Error reaching shirt details page.  Error code: " +  response.statusCode);
            }
          });
-
-      });
+}//for loop
+      //});//for each
          resolve({result: csv});
 
       });
