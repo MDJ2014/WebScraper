@@ -10,7 +10,7 @@ var dir = './data';
 var error = './scrapper_error.log';
 var rimraf = require('rimraf');
 var shirtUrls=[];
-var fields = ['Title', 'Price', 'Image URL', 'URL', 'Time'];
+var fields = ['Title', 'Price', 'ImageURL', 'URL', 'Time'];
 var csv='';
 var shirtLinks=[];
 //set options for entry point
@@ -26,15 +26,15 @@ var checkFile = function() {
    var promise = new Promise(function(resolve, reject){
       if(!fs.existsSync(dir)){ //if data folder does not exist create the data folder
              fs.mkdirSync(dir);
-             console.log(" data directory made");
+             console.log("data directory made");
          }
          else if(fs.existsSync(dir)){// if data folder does exist remove all files
              rimraf(dir, ()=>{
                  fs.mkdirSync(dir);
-                 console.log(" data directory already exists.  Old csv file removed");
+                 console.log("old csv file removed");
              });
              rimraf('./scrapper_error.log',()=>{//delete the scrapper_error.log file if results are received
-              console.log(" old error log file removed");
+              console.log("old error log file removed");
              });
          }
 resolve({});
@@ -73,7 +73,7 @@ var makeCsv = function(urls) {
       var counter=0;
 
 for(var i=0; i<shirtLinks.length;i++){
-      //   urls.forEach(function(link) {
+
             var link= 'https://calm-spire-44416.herokuapp.com/'+shirtLinks[i];
 
          request(link, function (error, response, body) {
@@ -82,12 +82,10 @@ for(var i=0; i<shirtLinks.length;i++){
                            var $ = cheerio.load(body);
                             var title=$('head title').text();
                            var price=$('.price').text();
-                            var imgSrc=$('.shirt-picture').find('span img').attr('src');
-                           // var imgSrc= 'https://calm-spire-44416.herokuapp.com/img/shirts/'+shirtLinks[i]+'.jpg';
-
-                           // var imgUrl= 'http://www.shirts4mike.com/' + imgSrc;
+                           var imgSrc=$('.shirt-picture').find('span img').attr('src');
                            var imgUrl= 'https://calm-spire-44416.herokuapp.com/' + imgSrc;
-                            console.log("IMG URL: " + imgUrl);
+
+
 //format the the current time.
                             var date =   moment(new Date()).format('YYYY-MM-DD');
                             var time=    moment(new Date()).format('MMMM Do YYYY, h:mm a');
@@ -97,7 +95,7 @@ for(var i=0; i<shirtLinks.length;i++){
 
          shirt.Title = title;
          shirt.Price=price;
-         shirt.Img = imgUrl;
+         shirt.ImageURL = imgUrl;
          shirt.URL=link;
          shirt.Time=time;
 
@@ -124,7 +122,7 @@ fs.writeFile(dir + '/' + date + '.csv', csv, function(error){
            }
          });
 }//for loop
-      //});//for each
+
          resolve({result: csv});
 
       });
